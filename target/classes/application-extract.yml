@@ -1,0 +1,10 @@
+spring:
+  main:
+    # Disable the main agent runner when in extract profile
+    web-application-type: none
+  ai:
+    openai:
+      api-key: dummy
+      chat:
+        options:
+          model: gpt-4o
