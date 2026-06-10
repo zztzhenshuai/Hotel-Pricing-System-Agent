@@ -1,0 +1,24 @@
+# Build output
+target/
+*.class
+
+# Logs and generated reports
+logs/*.log
+logs/*-report.md
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Maven wrapper cache
+.mvn/wrapper/maven-wrapper.jar
