@@ -2,6 +2,7 @@ package com.assignment.logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +28,9 @@ public class ConversationLogger {
     private final ObjectMapper mapper;
     private final String logDir;
     private final LocalDateTime sessionStart;
+    private int totalPromptTokens;
+    private int totalCompletionTokens;
+    private int totalTokens;
 
     public ConversationLogger(@Value("${add.output.log-dir:logs}") String logDir) {
         this.logDir = logDir;
@@ -48,6 +52,15 @@ public class ConversationLogger {
         addEntry("assistant", iteration, content);
     }
 
+    public void logAssistant(int iteration, String content, Usage usage) {
+        Map<String, Object> entry = addEntry("assistant", iteration, content);
+        if (usage != null) {
+            Map<String, Object> tokenUsage = toTokenUsageMap(usage);
+            entry.put("token_usage", tokenUsage);
+            accumulateTokenUsage(tokenUsage);
+        }
+    }
+
     public void logInfo(String message) {
         Map<String, Object> entry = new LinkedHashMap<>();
         entry.put("timestamp", LocalDateTime.now().format(TIMESTAMP_FMT));
@@ -57,13 +70,14 @@ public class ConversationLogger {
         System.out.println("[INFO] " + message);
     }
 
-    private void addEntry(String role, int iteration, String content) {
+    private Map<String, Object> addEntry(String role, int iteration, String content) {
         Map<String, Object> entry = new LinkedHashMap<>();
         entry.put("timestamp", LocalDateTime.now().format(TIMESTAMP_FMT));
         entry.put("role", role);
         entry.put("iteration", iteration);
         entry.put("content", content);
         entries.add(entry);
+        return entry;
     }
 
     public String exportToJson() {
@@ -78,6 +92,7 @@ public class ConversationLogger {
         output.put("ai_paradigm", "Single-Agent (Sequential reasoning + self-reflection)");
         output.put("llm", "gpt-5.4");
         output.put("total_turns", countHumanTurns());
+        output.put("token_usage", sessionTokenUsage());
         output.put("messages", entries);
 
         try {
@@ -99,6 +114,9 @@ public class ConversationLogger {
         System.out.println("\n========== SESSION SUMMARY ==========");
         System.out.println("Total user turns    : " + userTurns);
         System.out.println("Total assistant turns: " + assistantTurns);
+        System.out.println("Prompt tokens       : " + totalPromptTokens);
+        System.out.println("Completion tokens   : " + totalCompletionTokens);
+        System.out.println("Total tokens        : " + totalTokens);
         System.out.println("Session start       : " + sessionStart.format(TIMESTAMP_FMT));
         System.out.println("Session end         : " + LocalDateTime.now().format(TIMESTAMP_FMT));
         System.out.println("=====================================\n");
@@ -107,5 +125,32 @@ public class ConversationLogger {
     private long countHumanTurns() {
         return entries.stream()
                 .filter(e -> "user".equals(e.get("role"))).count();
+    }
+
+    private Map<String, Object> toTokenUsageMap(Usage usage) {
+        Map<String, Object> tokenUsage = new LinkedHashMap<>();
+        tokenUsage.put("prompt_tokens", safeTokenCount(usage.getPromptTokens()));
+        tokenUsage.put("completion_tokens", safeTokenCount(usage.getCompletionTokens()));
+        tokenUsage.put("total_tokens", safeTokenCount(usage.getTotalTokens()));
+        return tokenUsage;
+    }
+
+    private void accumulateTokenUsage(Map<String, Object> tokenUsage) {
+        totalPromptTokens += (Integer) tokenUsage.get("prompt_tokens");
+        totalCompletionTokens += (Integer) tokenUsage.get("completion_tokens");
+        totalTokens += (Integer) tokenUsage.get("total_tokens");
+    }
+
+    private Map<String, Object> sessionTokenUsage() {
+        Map<String, Object> tokenUsage = new LinkedHashMap<>();
+        tokenUsage.put("prompt_tokens", totalPromptTokens);
+        tokenUsage.put("completion_tokens", totalCompletionTokens);
+        tokenUsage.put("total_tokens", totalTokens);
+        tokenUsage.put("total_k_tokens", totalTokens / 1000.0);
+        return tokenUsage;
+    }
+
+    private int safeTokenCount(Integer tokenCount) {
+        return tokenCount == null ? 0 : tokenCount;
     }
 }

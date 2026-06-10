@@ -3,12 +3,13 @@ package com.assignment.agent;
 import com.assignment.logger.ConversationLogger;
 import com.assignment.prompt.IterationPrompts;
 import com.assignment.prompt.SystemPromptBuilder;
-import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.metadata.Usage;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.stereotype.Component;
 
@@ -20,17 +21,17 @@ public class AddArchitectAgent {
 
     private static final int TOTAL_ITERATIONS = 4;
 
-    private final ChatClient chatClient;
+    private final ChatModel chatModel;
     private final ConversationLogger logger;
     private final SystemPromptBuilder promptBuilder;
 
     // Manually maintained conversation history for cross-iteration context
     private final List<Message> history = new ArrayList<>();
 
-    public AddArchitectAgent(ChatClient chatClient,
+    public AddArchitectAgent(ChatModel chatModel,
                               ConversationLogger logger,
                               SystemPromptBuilder promptBuilder) {
-        this.chatClient = chatClient;
+        this.chatModel = chatModel;
         this.logger = logger;
         this.promptBuilder = promptBuilder;
     }
@@ -63,10 +64,13 @@ public class AddArchitectAgent {
         messages.add(new UserMessage(userPrompt));
 
         String response;
+        Usage usage = null;
         try {
-            response = chatClient.prompt(new Prompt(messages))
-                    .call()
-                    .content();
+            ChatResponse chatResponse = chatModel.call(new Prompt(messages));
+            response = chatResponse.getResult().getOutput().getText();
+            if (chatResponse.getMetadata() != null) {
+                usage = chatResponse.getMetadata().getUsage();
+            }
         } catch (Exception e) {
             response = "[ERROR] LLM call failed: " + e.getMessage();
             logger.logInfo(response);
@@ -77,7 +81,7 @@ public class AddArchitectAgent {
         history.add(new UserMessage(userPrompt));
         history.add(new AssistantMessage(response));
 
-        logger.logAssistant(iteration, response);
+        logger.logAssistant(iteration, response, usage);
         System.out.println(response);
         printDone(label);
     }

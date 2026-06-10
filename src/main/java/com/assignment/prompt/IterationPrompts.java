@@ -85,8 +85,8 @@ public final class IterationPrompts {
                     Now execute ADD Steps 2 through 7 for this iteration.
 
                     Context: Build upon the structures from Iterations 1 and 2.
-                    Apply architectural tactics and patterns to address the high-priority
-                    reliability, availability, and scalability requirements.
+                    Select design concepts that satisfy the high-priority reliability,
+                    availability, scalability, and modifiability drivers.
 
                     Focus drivers for this iteration:
                     - QA-2 (Reliability: 100% price change publication)
@@ -95,8 +95,8 @@ public final class IterationPrompts {
                     - QA-6 (Modifiability: support non-REST protocols without core changes)
 
                     For Step 6, produce the following views as Mermaid or PlantUML:
-                    a) Updated C&C view showing reliability and availability tactics
-                       (e.g., message queues, replicas, circuit breakers)
+                    a) Updated C&C view showing the selected design concepts for
+                       reliability and availability
                     b) Updated deployment view reflecting redundancy and scaling
 
                     Apply the self-reflection protocol after each step (Steps 2–7).

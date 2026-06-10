@@ -78,11 +78,36 @@ public class ReportExtractor {
         w.println("| Way of completing | Single-Agent (Option 2) |");
         w.println("| LLM used | " + root.getOrDefault("llm", "gpt-5.4") + " |");
         w.println("| Number of human interactions (turns) | " + userTurns + " |");
-        w.println("| Token consumption (K tokens) | *fill in* |");
+        w.println("| Prompt tokens | " + tokenValue(root, "prompt_tokens") + " |");
+        w.println("| Completion tokens | " + tokenValue(root, "completion_tokens") + " |");
+        w.println("| Total token consumption (K tokens) | " + kTokenValue(root) + " |");
         w.println("| Time cost (min) | *fill in* |");
         w.println();
         w.println("---");
         w.println();
+    }
+
+    @SuppressWarnings("unchecked")
+    private String tokenValue(Map<String, Object> root, String key) {
+        Object tokenUsage = root.get("token_usage");
+        if (!(tokenUsage instanceof Map<?, ?> usage)) {
+            return "Not recorded";
+        }
+        Object value = ((Map<String, Object>) usage).get(key);
+        return value == null ? "Not recorded" : value.toString();
+    }
+
+    @SuppressWarnings("unchecked")
+    private String kTokenValue(Map<String, Object> root) {
+        Object tokenUsage = root.get("token_usage");
+        if (!(tokenUsage instanceof Map<?, ?> usage)) {
+            return "Not recorded";
+        }
+        Object value = ((Map<String, Object>) usage).get("total_k_tokens");
+        if (value instanceof Number number) {
+            return String.format("%.3f", number.doubleValue());
+        }
+        return value == null ? "Not recorded" : value.toString();
     }
 
     private void writeAddOutputs(PrintWriter w, List<Map<String, Object>> messages) {
