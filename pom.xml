@@ -19,7 +19,8 @@
 
     <properties>
         <java.version>17</java.version>
-        <spring-ai.version>1.0.6</spring-ai.version>
+        <spring-ai.version>1.0.0</spring-ai.version>
+        <spring-ai-alibaba.version>1.0.0.2</spring-ai-alibaba.version>
     </properties>
 
     <dependencyManagement>
@@ -28,6 +29,13 @@
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-bom</artifactId>
                 <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud.ai</groupId>
+                <artifactId>spring-ai-alibaba-bom</artifactId>
+                <version>${spring-ai-alibaba.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -40,10 +48,9 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
-        <!-- Spring AI OpenAI starter (artifact renamed in 1.0.0 GA) -->
         <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-starter-model-openai</artifactId>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>
         </dependency>
 
         <dependency>
@@ -58,7 +65,7 @@
         </dependency>
     </dependencies>
 
-    <!-- Spring AI 1.0.x stable is on Maven Central; no extra repo needed -->
+    <!-- Spring AI Alibaba 1.0.x and Spring AI 1.0.x are resolved from Maven Central. -->
     <build>
         <plugins>
             <plugin>

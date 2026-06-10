@@ -3,8 +3,19 @@ spring:
     # Disable the main agent runner when in extract profile
     web-application-type: none
   ai:
-    openai:
+    dashscope:
       api-key: dummy
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
       chat:
+        enabled: false
         options:
-          model: gpt-4o
+          model: gpt-5.4
+
+app:
+  ai:
+    compatible:
+      api-key: dummy
+      base-url: https://yunwu.ai
+      model: gpt-5.4
+      temperature: 0.3
+      timeout-seconds: 180

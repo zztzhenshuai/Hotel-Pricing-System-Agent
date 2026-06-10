@@ -5,14 +5,23 @@ spring:
     web-application-type: none
 
   ai:
-    openai:
-      api-key: ${OPENAI_API_KEY:your-api-key-here}
-      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+    dashscope:
+      api-key: ${AI_DASHSCOPE_API_KEY:your-api-key-here}
+      base-url: ${AI_DASHSCOPE_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode}
       chat:
+        enabled: false
         options:
           model: gpt-5.4
           temperature: 0.3
-          max-tokens: 8192
+
+app:
+  ai:
+    compatible:
+      api-key: ${AI_DASHSCOPE_API_KEY:your-api-key-here}
+      base-url: ${AI_DASHSCOPE_BASE_URL:https://yunwu.ai}
+      model: gpt-5.4
+      temperature: 0.3
+      timeout-seconds: 180
 
 logging:
   level:

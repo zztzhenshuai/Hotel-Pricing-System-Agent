@@ -22,3 +22,6 @@ Thumbs.db
 
 # Maven wrapper cache
 .mvn/wrapper/maven-wrapper.jar
+
+# github
+.github/
